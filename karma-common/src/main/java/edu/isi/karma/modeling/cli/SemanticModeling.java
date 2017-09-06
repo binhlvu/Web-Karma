@@ -18,8 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 class Input {
     public int topKSteinerTree;
@@ -129,8 +128,47 @@ public class SemanticModeling {
     public Output runSemanticModeling(Input input) throws Exception {
         List<Node> steinerNodes = input.getSteinerNodes();
         GraphBuilder gb = ModelLearningGraph.getInstance(ontologyManager, ModelLearningGraphType.Compact).getGraphBuilder();
+        Map<String, String> domainID2NodeID = new HashMap<>();
         for (Node n: steinerNodes) {
             gb.addNode(n);
+
+            ColumnNode cn = (ColumnNode) n;
+            if (cn.getSemanticTypeStatus().equals(ColumnSemanticTypeStatus.UserAssigned)) {
+                // if user assigned semantic types, leveraging it to pick exactly one node for the column
+                SemanticType userSemanticType = cn.getUserSemanticTypes().get(0);
+                Node source = null;
+                Set<Node> domains = gb.getUriToNodesMap().get(userSemanticType.getDomain().getUri());
+
+                if (domains == null) {
+                    gb.addNode(new InternalNode(gb.getNodeIdFactory().getNodeId(userSemanticType.getDomain().getUri()), userSemanticType.getDomain()));
+                    domains = gb.getUriToNodesMap().get(userSemanticType.getDomain().getUri());
+                }
+
+                if (domainID2NodeID.containsKey(userSemanticType.getDomainId())) {
+                    // same domainID is already mapped before
+                    String nodeId = domainID2NodeID.get(userSemanticType.getDomainId());
+                    for (Node domain: domains) {
+                        if (domain.getId().equals(nodeId)) {
+                            source = domain;
+                            break;
+                        }
+                    }
+                } else {
+                    // node has not mapped before
+                    for (Node domain: domains) {
+                        if (source == null) {
+                            source = domain;
+                        }
+                        if (domain.getModelIds().size() > source.getModelIds().size()) {
+                            source = domain;
+                        }
+                    }
+                    domainID2NodeID.put(userSemanticType.getDomainId(), source.getId());
+                }
+
+                String id = String.format("%s---%s---%s", source.getId(), userSemanticType.getType().getUri(), n.getId());
+                gb.addLink(source, n, new DataPropertyLink(id, userSemanticType.getType()));
+            }
         }
 
         ModelLearner modelLearner = new ModelLearner(gb, steinerNodes);
