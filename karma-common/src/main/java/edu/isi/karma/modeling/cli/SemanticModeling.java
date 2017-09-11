@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 class Input {
+    public String sourceName;
     public int topKSteinerTree;
     public int numCandidateMappings;
     public int mappingBranchingFactor;
@@ -129,6 +130,8 @@ public class SemanticModeling {
         List<Node> steinerNodes = input.getSteinerNodes();
         GraphBuilder gb = ModelLearningGraph.getInstance(ontologyManager, ModelLearningGraphType.Compact).getGraphBuilder();
         Map<String, String> domainID2NodeID = new HashMap<>();
+        Map<String, String> nodeID2domainID = new HashMap<>();
+
         for (Node n: steinerNodes) {
             gb.addNode(n);
 
@@ -156,6 +159,10 @@ public class SemanticModeling {
                 } else {
                     // node has not mapped before
                     for (Node domain: domains) {
+                        if (nodeID2domainID.containsKey(domain.getId())) {
+                            // this node was used in another mapping;
+                            continue;
+                        }
                         if (source == null) {
                             source = domain;
                         }
@@ -163,12 +170,27 @@ public class SemanticModeling {
                             source = domain;
                         }
                     }
+
+                    if (source == null) {
+                        // run out of nodes
+                        source = new InternalNode(gb.getNodeIdFactory().getNodeId(userSemanticType.getDomain().getUri()), userSemanticType.getDomain());
+                        gb.addNode(source);
+                    } else {
+                        // have to update nodeIdFactory otherwise, when we run out of node, we will generate incorrect id
+                        gb.getNodeIdFactory().addNodeId(source.getId(), userSemanticType.getDomain().getUri());
+                    }
                     domainID2NodeID.put(userSemanticType.getDomainId(), source.getId());
+                    nodeID2domainID.put(source.getId(), userSemanticType.getDomainId());
                 }
 
                 String id = String.format("%s---%s---%s", source.getId(), userSemanticType.getType().getUri(), n.getId());
                 gb.addLink(source, n, new DataPropertyLink(id, userSemanticType.getType()));
             }
+        }
+
+        // double check setting userSemanticTypes
+        if (domainID2NodeID.size() != nodeID2domainID.size()) {
+            throw new RuntimeException("Bug in setting userSemanticTypes");
         }
 
         ModelLearner modelLearner = new ModelLearner(gb, steinerNodes);
