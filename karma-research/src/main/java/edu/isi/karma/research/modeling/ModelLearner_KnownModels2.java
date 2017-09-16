@@ -338,7 +338,9 @@ public class ModelLearner_KnownModels2 {
 
 	public static void test() throws Exception {
 
-		ServletContextParameterMap contextParameters = ContextParametersRegistry.getInstance().getDefault();
+		ServletContextParameterMap contextParameters = ContextParametersRegistry.getInstance().registerByKarmaHome("/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home");
+		contextParameters.setParameterValue(ServletContextParameterMap.ContextParameter.USER_DIRECTORY_PATH, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home");
+		contextParameters.setParameterValue(ServletContextParameterMap.ContextParameter.USER_CONFIG_DIRECTORY, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/config");
 
 		//		String inputPath = Params.INPUT_DIR;
 		String graphPath = Params.GRAPHS_DIR;
@@ -507,7 +509,7 @@ public class ModelLearner_KnownModels2 {
 
 //				System.out.println("time: " + elapsedTimeSec);
 				
-				int cutoff = 20;//ModelingConfiguration.getMaxCandidateModels();
+				int cutoff = 10;//ModelingConfiguration.getMaxCandidateModels();
 				List<SortableSemanticModel> topHypotheses = null;
 				if (hypothesisList != null) {
 					topHypotheses = hypothesisList.size() > cutoff ? 

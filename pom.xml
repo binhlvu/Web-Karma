@@ -11,7 +11,7 @@
 	<modules>
 		<module>karma-common</module>
 		<module>karma-web</module>
-		<module>karma-offline</module>
+		<!--<module>karma-offline</module>-->
 		<module>karma-jdbc</module>
 		<module>karma-util</module>
 		<module>karma-commands</module>
@@ -21,6 +21,7 @@
 		<module>karma-typer</module>
 		<module>karma-jsonld</module>
 		<module>karma-spark</module>
+		<module>karma-research</module>
 	</modules>
 
 

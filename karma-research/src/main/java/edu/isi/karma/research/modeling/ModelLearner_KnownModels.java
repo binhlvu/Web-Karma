@@ -536,7 +536,7 @@ public class ModelLearner_KnownModels {
 
 
 				String nodeId = new RandomGUID().toString();
-				ColumnNode target = new ColumnNode(nodeId, nodeId, sourceColumn.getColumnName(), null);
+				ColumnNode target = new ColumnNode(nodeId, nodeId, sourceColumn.getColumnName(), null, "en");
 				if (!this.graphBuilder.addNode(target)) continue;;
 				addedNodes.add(target);
 
@@ -599,7 +599,7 @@ public class ModelLearner_KnownModels {
 		if (!this.graphBuilder.addNodeAndUpdate(source, addedNodes)) return null;
 
 		nodeId = new RandomGUID().toString();
-		ColumnNode target = new ColumnNode(nodeId, nodeId, sourceColumn.getColumnName(), null);
+		ColumnNode target = new ColumnNode(nodeId, nodeId, sourceColumn.getColumnName(), null, "en");
 		if (!this.graphBuilder.addNode(target)) return null;
 		addedNodes.add(target);
 
@@ -694,17 +694,17 @@ public class ModelLearner_KnownModels {
 		/***
 		 * When running with k=1, change the flag "multiple.same.property.per.node" to true so all attributes have at least one semantic types
 		 */
-		ServletContextParameterMap contextParameters = ContextParametersRegistry.getInstance().registerByKarmaHome("/Users/mohsen/karma/");
-		contextParameters.setParameterValue(ContextParameter.USER_DIRECTORY_PATH, "/Users/mohsen/karma/");
-		contextParameters.setParameterValue(ContextParameter.USER_CONFIG_DIRECTORY, "/Users/mohsen/karma/config");
+		ServletContextParameterMap contextParameters = ContextParametersRegistry.getInstance().registerByKarmaHome("/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home");
+		contextParameters.setParameterValue(ContextParameter.USER_DIRECTORY_PATH, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home");
+		contextParameters.setParameterValue(ContextParameter.USER_CONFIG_DIRECTORY, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/config");
 		contextParameters.setParameterValue(ContextParameter.TRAINING_EXAMPLE_MAX_COUNT, "1000000");
-		contextParameters.setParameterValue(ContextParameter.SEMTYPE_MODEL_DIRECTORY, "/Users/mohsen/karma/semantic-type-files/");
-		contextParameters.setParameterValue(ContextParameter.JSON_MODELS_DIR, "/Users/mohsen/karma/models-json/");
-		contextParameters.setParameterValue(ContextParameter.GRAPHVIZ_MODELS_DIR, "/Users/mohsen/karma/models-graphviz/");
-		contextParameters.setParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY, "/Users/mohsen/karma/python/");
-		contextParameters.setParameterValue(ContextParameter.EVALUATE_MRR, "/Users/mohsen/karma/evaluate-mrr/");
-		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
-		PythonRepositoryRegistry.getInstance().register(pythonRepository);
+		contextParameters.setParameterValue(ContextParameter.SEMTYPE_MODEL_DIRECTORY, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/semantic-type-files/");
+		contextParameters.setParameterValue(ContextParameter.JSON_MODELS_DIR, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/models-json/");
+		contextParameters.setParameterValue(ContextParameter.GRAPHVIZ_MODELS_DIR, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/models-graphviz/");
+		contextParameters.setParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/python/");
+		contextParameters.setParameterValue(ContextParameter.EVALUATE_MRR, "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home/evaluate-mrr/");
+//		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
+//		PythonRepositoryRegistry.getInstance().register(pythonRepository);
 
 		//		String inputPath = Params.INPUT_DIR;
 		String graphPath = Params.GRAPHS_DIR;
@@ -747,8 +747,8 @@ public class ModelLearner_KnownModels {
 		ModelLearner_KnownModels modelLearner;
 		
 		boolean onlyGenerateSemanticTypeStatistics = false;
-		boolean iterativeEvaluation = true;
-		boolean useCorrectType = false;
+		boolean iterativeEvaluation = false;
+		boolean useCorrectType = true;
 		boolean onlyEvaluateInternalLinks = false || useCorrectType; 
 		boolean zeroKnownModel = false;
 		int numberOfCandidates = 1;
@@ -979,9 +979,7 @@ public class ModelLearner_KnownModels {
 //										elapsedTimeSec + "\t" + 
 //										correctModel.getAccuracy() + "\t" + 
 //										correctModel.getMrr();
-								s = me.getPrecision() + "\t" + 
-										me.getRecall() + "\t" + 
-										elapsedTimeSec; 
+								s = newSource.getName() + "\t" + me.getPrecision() + "\t" + me.getRecall() + "\t" + elapsedTimeSec;
 								resultFile.println(s);
 							}
 
@@ -1290,7 +1288,7 @@ public class ModelLearner_KnownModels {
 	}
 
 	public static void main(String[] args) throws Exception {
-		boolean uk_hack = true;
+		boolean uk_hack = false;
 		if (uk_hack) runUkHackEvaluation();
 		else runResearchEvaluation();
 	}

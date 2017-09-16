@@ -50,6 +50,10 @@ public class ColumnNode extends Node {
 		this.learnedSemanticTypes = null;
 		this.semanticTypeStatus = ColumnSemanticTypeStatus.NotAssigned;
 	}
+
+	public ColumnNode(String id, String hNodeId, String columnName, Label rdfLiteralType) {
+		this(id, hNodeId, columnName, rdfLiteralType, "en");
+	}
 	
 	public void includeInAutoModel() {
 		this.semanticTypeStatus = ColumnSemanticTypeStatus.AutoAssigned;

@@ -343,11 +343,11 @@ public class ModelLearner_LOD_Greedy {
 	public static void simpleTest() {
 		// get list of semantic types for a source
 		List<SemanticType> types = new ArrayList<SemanticType>();
-		SemanticType st1 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E39_Actor"), Origin.User, 1.0);
-		SemanticType st2 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E22_Man-Made_Object"), Origin.User, 1.0);
-		SemanticType st3 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E21_Person"), Origin.User, 1.0);
-		SemanticType st4 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E55_Type"), Origin.User, 1.0);
-		SemanticType st5 = new SemanticType("", null, new Label("http://www.w3.org/2004/02/skos/core#Concept"), Origin.User, 1.0);
+		SemanticType st1 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E39_Actor"), null, false, Origin.User, 1.0);
+		SemanticType st2 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E22_Man-Made_Object"), null, false, Origin.User, 1.0);
+		SemanticType st3 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E21_Person"), null, false, Origin.User, 1.0);
+		SemanticType st4 = new SemanticType("", null, new Label("http://erlangen-crm.org/current/E55_Type"), null, false, Origin.User, 1.0);
+		SemanticType st5 = new SemanticType("", null, new Label("http://www.w3.org/2004/02/skos/core#Concept"), null, false, Origin.User, 1.0);
 		types.add(st1); 
 		types.add(st2);
 		types.add(st3);
