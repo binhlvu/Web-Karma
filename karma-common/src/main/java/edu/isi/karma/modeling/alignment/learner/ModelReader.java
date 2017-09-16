@@ -23,6 +23,7 @@ package edu.isi.karma.modeling.alignment.learner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import edu.isi.karma.modeling.alignment.SemanticModel;
@@ -53,18 +54,18 @@ public class ModelReader {
 
 		File ff = new File(path);
 		File[] files = ff.listFiles();
-		
+		Arrays.sort(files);
 		List<SemanticModel> semanticModels = new ArrayList<SemanticModel>();
-		
+
+
 		for (File f : files) {
 			if (f.getName().endsWith(fileExtension)) {
 				SemanticModel model = SemanticModel.readJson(f.getAbsolutePath());
 				semanticModels.add(model);
 			}
 		}
-		
-		return semanticModels;
 
+		return semanticModels;
 	}
 
 

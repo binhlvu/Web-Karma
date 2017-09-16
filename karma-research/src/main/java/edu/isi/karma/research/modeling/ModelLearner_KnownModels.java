@@ -24,15 +24,7 @@ package edu.isi.karma.research.modeling;
 import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -771,17 +763,17 @@ public class ModelLearner_KnownModels {
 		/***
 		 * When running with k=1, change the flag "multiple.same.property.per.node" to true so all attributes have at least one semantic types
 		 */
-		ServletContextParameterMap contextParameters = ContextParametersRegistry.getInstance().registerByKarmaHome("/Users/mohsen/karma/");
-		contextParameters.setParameterValue(ContextParameter.USER_DIRECTORY_PATH, "/Users/mohsen/karma/");
-		contextParameters.setParameterValue(ContextParameter.USER_CONFIG_DIRECTORY, "/Users/mohsen/karma/config");
+		ServletContextParameterMap contextParameters = ContextParametersRegistry.getInstance().registerByKarmaHome(Params.ROOT_DIR);
+		contextParameters.setParameterValue(ContextParameter.USER_DIRECTORY_PATH, Params.ROOT_DIR);
+		contextParameters.setParameterValue(ContextParameter.USER_CONFIG_DIRECTORY, Params.ROOT_DIR + "config");
 		contextParameters.setParameterValue(ContextParameter.TRAINING_EXAMPLE_MAX_COUNT, "1000000");
-		contextParameters.setParameterValue(ContextParameter.SEMTYPE_MODEL_DIRECTORY, "/Users/mohsen/karma/semantic-type-files/");
-		contextParameters.setParameterValue(ContextParameter.JSON_MODELS_DIR, "/Users/mohsen/karma/models-json/");
-		contextParameters.setParameterValue(ContextParameter.GRAPHVIZ_MODELS_DIR, "/Users/mohsen/karma/models-graphviz/");
-		contextParameters.setParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY, "/Users/mohsen/karma/python/");
-		contextParameters.setParameterValue(ContextParameter.EVALUATE_MRR, "/Users/mohsen/karma/evaluate-mrr/");
-		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
-		PythonRepositoryRegistry.getInstance().register(pythonRepository);
+		contextParameters.setParameterValue(ContextParameter.SEMTYPE_MODEL_DIRECTORY, Params.ROOT_DIR + "semantic-type-files/");
+		contextParameters.setParameterValue(ContextParameter.JSON_MODELS_DIR, Params.MODEL_DIR);
+		contextParameters.setParameterValue(ContextParameter.GRAPHVIZ_MODELS_DIR, Params.GRAPHVIS_DIR);
+		contextParameters.setParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY, Params.ROOT_DIR + "python/");
+		contextParameters.setParameterValue(ContextParameter.EVALUATE_MRR, Params.ROOT_DIR + "evaluate-mrr/");
+//		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
+//		PythonRepositoryRegistry.getInstance().register(pythonRepository);
 
 		//		String inputPath = Params.INPUT_DIR;
 		String graphPath = Params.GRAPHS_DIR;
@@ -794,6 +786,9 @@ public class ModelLearner_KnownModels {
 		
 		File[] sources = new File(Params.SOURCE_DIR).listFiles();
 		File[] r2rmlModels = new File(Params.R2RML_DIR).listFiles();
+
+		Arrays.sort(sources);
+		Arrays.sort(r2rmlModels);
 		if (sources.length > 0 && sources[0].getName().startsWith(".")) 
 			sources = (File[]) ArrayUtils.removeElement(sources, sources[0]);
 		if (r2rmlModels.length > 0 && r2rmlModels[0].getName().startsWith(".")) 
@@ -825,10 +820,13 @@ public class ModelLearner_KnownModels {
 		
 		boolean onlyGenerateSemanticTypeStatistics = false;
 		boolean iterativeEvaluation = true;
-		boolean useCorrectType = false;
+		boolean useCorrectType = true;
 		boolean onlyEvaluateInternalLinks = false || useCorrectType; 
 		boolean zeroKnownModel = false;
 		int numberOfCandidates = 1;
+//		if (numberOfCandidates == 1) {
+//			throw new RuntimeException("WTF");
+//		}
 
 		if (onlyGenerateSemanticTypeStatistics) {
 			getStatistics(semanticModels);
@@ -893,7 +891,7 @@ public class ModelLearner_KnownModels {
 				resultsArray[1].append("p \t r \t t \t a \t m");
 			}
 
-//			numberOfKnownModels = 2;
+//			numberOfKnownModels = 28;
 			while (numberOfKnownModels <= semanticModels.size() - 1) 
 			{
 
@@ -989,7 +987,7 @@ public class ModelLearner_KnownModels {
 				long elapsedTimeMillis = System.currentTimeMillis() - start;
 				float elapsedTimeSec = elapsedTimeMillis/1000F;
 				
-				int cutoff = 20;//ModelingConfiguration.getMaxCandidateModels();
+				int cutoff = 10;// ModelingConfiguration.getMaxCandidateModels();
 				List<SortableSemanticModel> topHypotheses = null;
 				if (hypothesisList != null) {
 					topHypotheses = hypothesisList.size() > cutoff ? 
@@ -1025,7 +1023,7 @@ public class ModelLearner_KnownModels {
 						models.put(label, m);
 
 						if (k == 0) { // first rank model
-							System.out.println("number of known models: " + numberOfKnownModels +
+							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
 									", precision: " + me.getPrecision() + 
 									", recall: " + me.getRecall() + 
 									", time: " + elapsedTimeSec + 
@@ -1056,7 +1054,7 @@ public class ModelLearner_KnownModels {
 //										elapsedTimeSec + "\t" + 
 //										correctModel.getAccuracy() + "\t" + 
 //										correctModel.getMrr();
-								s = me.getPrecision() + "\t" + 
+								s = newSource.getName() + "\t" + me.getPrecision() + "\t" +
 										me.getRecall() + "\t" + 
 										elapsedTimeSec; 
 								resultFile.println(s);
