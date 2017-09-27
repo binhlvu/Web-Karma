@@ -819,7 +819,7 @@ public class ModelLearner_KnownModels {
 		ModelLearner_KnownModels modelLearner;
 		
 		boolean onlyGenerateSemanticTypeStatistics = false;
-		boolean iterativeEvaluation = true;
+		boolean iterativeEvaluation = false;
 		boolean useCorrectType = true;
 		boolean onlyEvaluateInternalLinks = false || useCorrectType; 
 		boolean zeroKnownModel = false;
@@ -863,7 +863,7 @@ public class ModelLearner_KnownModels {
 //		if (true) return;
 
 		for (int i = 0; i < semanticModels.size(); i++) {
-//		for (int i = 0; i <= 1; i++) {
+//		for (int i = 8; i < 9; i++) {
 //		int i = 1; {
 
 			// clean semantic files folder in karma home
@@ -891,7 +891,7 @@ public class ModelLearner_KnownModels {
 				resultsArray[1].append("p \t r \t t \t a \t m");
 			}
 
-//			numberOfKnownModels = 28;
+//			numberOfKnownModels = 19;
 			while (numberOfKnownModels <= semanticModels.size() - 1) 
 			{
 
