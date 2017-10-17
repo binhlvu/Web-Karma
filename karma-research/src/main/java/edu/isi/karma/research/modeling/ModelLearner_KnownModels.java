@@ -772,8 +772,8 @@ public class ModelLearner_KnownModels {
 		contextParameters.setParameterValue(ContextParameter.GRAPHVIZ_MODELS_DIR, Params.GRAPHVIS_DIR);
 		contextParameters.setParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY, Params.ROOT_DIR + "python/");
 		contextParameters.setParameterValue(ContextParameter.EVALUATE_MRR, Params.ROOT_DIR + "evaluate-mrr/");
-//		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
-//		PythonRepositoryRegistry.getInstance().register(pythonRepository);
+		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
+		PythonRepositoryRegistry.getInstance().register(pythonRepository);
 
 		//		String inputPath = Params.INPUT_DIR;
 		String graphPath = Params.GRAPHS_DIR;
@@ -819,8 +819,8 @@ public class ModelLearner_KnownModels {
 		ModelLearner_KnownModels modelLearner;
 		
 		boolean onlyGenerateSemanticTypeStatistics = false;
-		boolean iterativeEvaluation = false;
-		boolean useCorrectType = true;
+		boolean iterativeEvaluation = true;
+		boolean useCorrectType = false;
 		boolean onlyEvaluateInternalLinks = false || useCorrectType; 
 		boolean zeroKnownModel = false;
 		int numberOfCandidates = 1;
@@ -863,7 +863,7 @@ public class ModelLearner_KnownModels {
 //		if (true) return;
 
 		for (int i = 0; i < semanticModels.size(); i++) {
-//		for (int i = 8; i < 9; i++) {
+//		for (int i = 0; i < 1; i++) {
 //		int i = 1; {
 
 			// clean semantic files folder in karma home
@@ -892,7 +892,8 @@ public class ModelLearner_KnownModels {
 			}
 
 //			numberOfKnownModels = 19;
-			while (numberOfKnownModels <= semanticModels.size() - 1) 
+			while (numberOfKnownModels <= semanticModels.size() - 1)
+//            while (numberOfKnownModels < 20)
 			{
 
 				trainingData.clear();
@@ -1048,15 +1049,15 @@ public class ModelLearner_KnownModels {
 									resultsArray[numberOfKnownModels + 2].append(" \t ");
 								resultsArray[numberOfKnownModels + 2].append(s);
 							} else {
-//								s = newSource.getName() + "\t" + 
-//										me.getPrecision() + "\t" + 
-//										me.getRecall() + "\t" + 
-//										elapsedTimeSec + "\t" + 
-//										correctModel.getAccuracy() + "\t" + 
-//										correctModel.getMrr();
-								s = newSource.getName() + "\t" + me.getPrecision() + "\t" +
-										me.getRecall() + "\t" + 
-										elapsedTimeSec; 
+								s = newSource.getName() + "\t" +
+										me.getPrecision() + "\t" +
+										me.getRecall() + "\t" +
+										elapsedTimeSec + "\t" +
+										correctModel.getAccuracy() + "\t" +
+										correctModel.getMrr();
+//								s = newSource.getName() + "\t" + me.getPrecision() + "\t" +
+//										me.getRecall() + "\t" +
+//										elapsedTimeSec;
 								resultFile.println(s);
 							}
 
