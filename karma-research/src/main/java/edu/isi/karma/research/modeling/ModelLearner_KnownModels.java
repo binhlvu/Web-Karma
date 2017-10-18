@@ -21,13 +21,16 @@
 
 package edu.isi.karma.research.modeling;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.google.gson.stream.JsonWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jgrapht.graph.AsUndirectedGraph;
 import org.jgrapht.graph.DirectedWeightedMultigraph;
 import org.jgrapht.graph.WeightedMultigraph;
@@ -42,8 +45,6 @@ import edu.isi.karma.er.helper.PythonRepositoryRegistry;
 import edu.isi.karma.modeling.alignment.GraphBuilder;
 import edu.isi.karma.modeling.alignment.GraphBuilderTopK;
 import edu.isi.karma.modeling.alignment.GraphUtil;
-import edu.isi.karma.modeling.alignment.GraphVizLabelType;
-import edu.isi.karma.modeling.alignment.GraphVizUtil;
 import edu.isi.karma.modeling.alignment.LinkIdFactory;
 import edu.isi.karma.modeling.alignment.ModelEvaluation;
 import edu.isi.karma.modeling.alignment.NodeIdFactory;
@@ -756,9 +757,43 @@ public class ModelLearner_KnownModels {
 
 		}
 	}
+
+	public static String toJSONString(SemanticModel sm) throws Exception {
+		StringWriter out = new StringWriter();
+		JsonWriter writer = new JsonWriter(out);
+
+		sm.writeModel(writer);
+		return out.toString();
+	}
+
+	public static void write2File(String fileName, List<String> lines) throws Exception {
+		PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+		for (String line: lines) {
+			writer.println(line);
+		}
+		writer.close();
+	}
 	
 	
 	public static void main(String[] args) throws Exception {
+		// BINH: Add code to handle cli arg
+		boolean useCorrectType = true;
+		int numberOfCandidates = 4;
+		int cutoff = 10; // this is to trim off the candidate models, (after combining all topKSteinerTree)
+		CliArg cliArg = null;
+
+//		if (args.length > 0) {
+			cliArg = new CliArg(args);
+			Params.ROOT_DIR = cliArg.karmaHome.endsWith("/") ? cliArg.karmaHome : cliArg.karmaHome + "/";
+			Params.DATASET_NAME = cliArg.datasetName;
+			useCorrectType = cliArg.useCorrectType;
+			numberOfCandidates = cliArg.numCandidateSemanticType;
+			cutoff = cliArg.cutoff;
+//		}
+
+		Params.OUTPUT_DIR = Params.ROOT_DIR + "output/";
+
+		///////////////////////////////////////////////////////////////////////////
 
 		/***
 		 * When running with k=1, change the flag "multiple.same.property.per.node" to true so all attributes have at least one semantic types
@@ -774,6 +809,40 @@ public class ModelLearner_KnownModels {
 		contextParameters.setParameterValue(ContextParameter.EVALUATE_MRR, Params.ROOT_DIR + "evaluate-mrr/");
 		PythonRepository pythonRepository = new PythonRepository(true, contextParameters.getParameterValue(ContextParameter.USER_PYTHON_SCRIPTS_DIRECTORY));
 		PythonRepositoryRegistry.getInstance().register(pythonRepository);
+
+		// BINH: Code for CLI
+		if (cliArg != null) {
+			ModelingConfiguration modelingConfiguration = ModelingConfigurationRegistry.getInstance().getModelingConfiguration(contextParameters.getId());
+			cliArg.updateModelingConfiguration(modelingConfiguration);
+
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			FileUtils.cleanDirectory(new File(Params.OUTPUT_DIR));
+			Date date = new Date();
+			write2File(Params.OUTPUT_DIR + ".meta", Arrays.asList(
+					String.format("created: %s", dateFormat.format(date)),
+					String.format("cli params: %s", StringUtils.join(args, " ")),
+					"===================================================",
+					"Controlling parameters:",
+					String.format("\t KarmaHome: %s", Params.ROOT_DIR),
+					String.format("\t Dataset name: %s", Params.DATASET_NAME),
+					String.format("\t Output dir: %s", Params.OUTPUT_DIR),
+					String.format("\t useCorrectType: %s", useCorrectType),
+					String.format("\t numberOfCandidates: %s", numberOfCandidates),
+					String.format("\t cutoff: %s", cutoff),
+					String.format("\t trainSize: [%s, %s]", cliArg.trainSizeMin, cliArg.trainSizeMax),
+					String.format("\t testSourceIndex: [%s, %s)", cliArg.testSourceIndexBegin, cliArg.testSourceIndexEnd),
+					"",
+					String.format("\t modelingConfiguration.numCandidateMappings: %s", modelingConfiguration.getNumCandidateMappings()),
+					String.format("\t modelingConfiguration.mappingBranchingFactor: %s", modelingConfiguration.getMappingBranchingFactor()),
+					String.format("\t modelingConfiguration.multipleSamePropertyPerNode: %s", modelingConfiguration.isMultipleSamePropertyPerNode()),
+					String.format("\t modelingConfiguration.topKSteinerTree: %s", modelingConfiguration.getTopKSteinerTree()),
+					"",
+					String.format("\t modelingConfiguration.scoringCoherenceSCoefficient: %s", modelingConfiguration.getScoringCoherenceSCoefficient()),
+					String.format("\t modelingConfiguration.scoringConfidenceCoefficient: %s", modelingConfiguration.getScoringConfidenceCoefficient()),
+					String.format("\t modelingConfiguration.scoringSizeCoefficient: %s", modelingConfiguration.getScoringSizeCoefficient())
+			));
+		}
+		////////////////////////////////////////////////////////////////////
 
 		//		String inputPath = Params.INPUT_DIR;
 		String graphPath = Params.GRAPHS_DIR;
@@ -819,14 +888,9 @@ public class ModelLearner_KnownModels {
 		ModelLearner_KnownModels modelLearner;
 		
 		boolean onlyGenerateSemanticTypeStatistics = false;
-		boolean iterativeEvaluation = true;
-		boolean useCorrectType = false;
-		boolean onlyEvaluateInternalLinks = false || useCorrectType; 
+		boolean iterativeEvaluation = false;
+		boolean onlyEvaluateInternalLinks = false || useCorrectType;
 		boolean zeroKnownModel = false;
-		int numberOfCandidates = 1;
-//		if (numberOfCandidates == 1) {
-//			throw new RuntimeException("WTF");
-//		}
 
 		if (onlyGenerateSemanticTypeStatistics) {
 			getStatistics(semanticModels);
@@ -862,10 +926,20 @@ public class ModelLearner_KnownModels {
 //				sources[20], r2rmlModels[20], 0, numberOfCandidates);
 //		if (true) return;
 
-		for (int i = 0; i < semanticModels.size(); i++) {
-//		for (int i = 0; i < 1; i++) {
-//		int i = 1; {
+		// BINH: add code to control testing sources
+		int testSourceIndexBegin = 0;
+		int testSourceIndexEnd = semanticModels.size();
+		int trainSizeMin = 0;
+		int trainSizeMax = semanticModels.size() - 1;
 
+		if (cliArg != null) {
+			testSourceIndexBegin = cliArg.testSourceIndexBegin;
+			testSourceIndexEnd = cliArg.testSourceIndexEnd;
+			trainSizeMin = cliArg.trainSizeMin;
+			trainSizeMax = cliArg.trainSizeMax;
+		}
+
+		for (int i = testSourceIndexBegin; i < testSourceIndexEnd; i++) {
 			// clean semantic files folder in karma home
 			FileUtils.cleanDirectory(semFilesFolder);
 			trainingSource = null;
@@ -878,12 +952,15 @@ public class ModelLearner_KnownModels {
 			logger.info(newSource.getName() + "(#attributes:" + newSource.getColumnNodes().size() + ")");
 			System.out.println(newSource.getName() + "(#attributes:" + newSource.getColumnNodes().size() + ")");
 			logger.info("======================================================");
-			
-			if (zeroKnownModel)
-				numberOfKnownModels = 0;
-			else
-				numberOfKnownModels = iterativeEvaluation ? 0 : semanticModels.size() - 1;
-			
+
+			// BINH: comment out zeroKnownModel
+//			if (zeroKnownModel)
+//				numberOfKnownModels = 0;
+//			else
+//				numberOfKnownModels = iterativeEvaluation ? 0 : semanticModels.size() - 1;
+
+			numberOfKnownModels = trainSizeMin;
+
 			if (iterativeEvaluation) {
 				if (resultsArray[0].length() > 0)	resultsArray[0].append(" \t ");			
 				resultsArray[0].append(newSource.getName() + "(" + newSource.getColumnNodes().size() + ")" + "\t" + " " + "\t" + " " + "\t" + " " + "\t" + " ");
@@ -891,8 +968,8 @@ public class ModelLearner_KnownModels {
 				resultsArray[1].append("p \t r \t t \t a \t m");
 			}
 
-//			numberOfKnownModels = 19;
-			while (numberOfKnownModels <= semanticModels.size() - 1)
+//			numberOfKnownModels = 20;
+			while (trainSizeMin <= numberOfKnownModels && numberOfKnownModels <= trainSizeMax)
 //            while (numberOfKnownModels < 20)
 			{
 
@@ -925,15 +1002,17 @@ public class ModelLearner_KnownModels {
 				} else {
 					testSource = sources[newSourceIndex];
 					testModel = r2rmlModels[newSourceIndex];
-					if (iterativeEvaluation) {
-						correctModel = new OfflineTraining().getCorrectModel(contextParameters, 
-								trainingSource, trainingModel, 
-								testSource, testModel, numberOfKnownModels, numberOfCandidates);
-					} else {
+					// BINH: comment out iterativeEvaluation if
+//					if (iterativeEvaluation) {
+//						// TODO: don't understand why iterative Evaluation go here, it shouldn't depend on iterativeEvaluation
+//						correctModel = new OfflineTraining().getCorrectModel(contextParameters,
+//								trainingSource, trainingModel,
+//								testSource, testModel, numberOfKnownModels, numberOfCandidates);
+//					} else {
 						correctModel = new OfflineTraining().getCorrectModel(contextParameters, 
 								trainingSources, trainingModels, 
 								testSource, testModel, numberOfCandidates);
-					}
+//					}
 				}
 				
 				
@@ -988,64 +1067,64 @@ public class ModelLearner_KnownModels {
 				long elapsedTimeMillis = System.currentTimeMillis() - start;
 				float elapsedTimeSec = elapsedTimeMillis/1000F;
 				
-				int cutoff = 10;// ModelingConfiguration.getMaxCandidateModels();
 				List<SortableSemanticModel> topHypotheses = null;
 				if (hypothesisList != null) {
 					topHypotheses = hypothesisList.size() > cutoff ? 
 							hypothesisList.subList(0, cutoff) : 
 								hypothesisList;
 				}
+				List<String> serializedTopHypotheses = new ArrayList<>();
 
 				Map<String, SemanticModel> models = 
 						new TreeMap<String, SemanticModel>();
 
 				ModelEvaluation me;
 				models.put("1-correct model", correctModel);
-				if (topHypotheses != null)
+				if (topHypotheses != null) {
 					for (int k = 0; k < topHypotheses.size(); k++) {
-
 						SortableSemanticModel m = topHypotheses.get(k);
+						serializedTopHypotheses.add(toJSONString(m));
 
 						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
 
-						String label = "candidate " + k + "\n" + 
+						String label = "candidate " + k + "\n" +
 //								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
 								"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
-						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ? 
+						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
 								"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
 						label += "confidence:" + m.getConfidenceScore() + "\n";
 						label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
 						label +=
 								"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
-								//								"-distance:" + me.getDistance() + 
-								"-precision:" + me.getPrecision() + 
-								"-recall:" + me.getRecall();
+										//								"-distance:" + me.getDistance() +
+										"-precision:" + me.getPrecision() +
+										"-recall:" + me.getRecall();
 
 						models.put(label, m);
 
 						if (k == 0) { // first rank model
 							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
-									", precision: " + me.getPrecision() + 
-									", recall: " + me.getRecall() + 
-									", time: " + elapsedTimeSec + 
-									", accuracy: " + correctModel.getAccuracy() + 
-									", mrr: " + correctModel.getMrr()); 
+									", precision: " + me.getPrecision() +
+									", recall: " + me.getRecall() +
+									", time: " + elapsedTimeSec +
+									", accuracy: " + correctModel.getAccuracy() +
+									", mrr: " + correctModel.getMrr());
 							logger.info("number of known models: " + numberOfKnownModels +
-									", precision: " + me.getPrecision() + 
-									", recall: " + me.getRecall() + 
-									", time: " + elapsedTimeSec + 
-									", accuracy: " + correctModel.getAccuracy() + 
-									", mrr: " + correctModel.getMrr()); 
+									", precision: " + me.getPrecision() +
+									", recall: " + me.getRecall() +
+									", time: " + elapsedTimeSec +
+									", accuracy: " + correctModel.getAccuracy() +
+									", mrr: " + correctModel.getMrr());
 //							resultFile.println("number of known models \t precision \t recall");
 //							resultFile.println(numberOfKnownModels + "\t" + me.getPrecision() + "\t" + me.getRecall());
-							String s = me.getPrecision() + "\t" + 
-										me.getRecall() + "\t" + 
-										elapsedTimeSec + "\t" + 
-										correctModel.getAccuracy() + "\t" + 
-										correctModel.getMrr();
-							
+							String s = me.getPrecision() + "\t" +
+									me.getRecall() + "\t" +
+									elapsedTimeSec + "\t" +
+									correctModel.getAccuracy() + "\t" +
+									correctModel.getMrr();
+
 							if (iterativeEvaluation) {
-								if (resultsArray[numberOfKnownModels + 2].length() > 0) 
+								if (resultsArray[numberOfKnownModels + 2].length() > 0)
 									resultsArray[numberOfKnownModels + 2].append(" \t ");
 								resultsArray[numberOfKnownModels + 2].append(s);
 							} else {
@@ -1064,23 +1143,28 @@ public class ModelLearner_KnownModels {
 //							resultFile.println(me.getPrecision() + "\t" + me.getRecall() + "\t" + elapsedTimeSec);
 						}
 					}
+				}
 
-				String outputPath = Params.OUTPUT_DIR;
-				String outName = !iterativeEvaluation?
-						outputPath + semanticModels.get(newSourceIndex).getName() + Params.GRAPHVIS_OUT_DETAILS_FILE_EXT : 
-							outputPath + semanticModels.get(newSourceIndex).getName() + ".knownModels=" + numberOfKnownModels + Params.GRAPHVIS_OUT_DETAILS_FILE_EXT;
+				// BINH: write the sm candidate generation result to file in folder: output/
+				write2File(Params.OUTPUT_DIR + String.format("trainsize%d--source--%s.json", numberOfKnownModels, newSource.getName()), serializedTopHypotheses);
 
-				GraphVizUtil.exportSemanticModelsToGraphviz(
-						models, 
-						newSource.getName(),
-						outName,
-						GraphVizLabelType.LocalId,
-						GraphVizLabelType.LocalUri,
-						true,
-						true);
+				// BINH: comment out the export semantic models to graphviz below
+//				String outputPath = Params.OUTPUT_DIR;
+//				String outName = !iterativeEvaluation?
+//						outputPath + semanticModels.get(newSourceIndex).getName() + Params.GRAPHVIS_OUT_DETAILS_FILE_EXT :
+//							outputPath + semanticModels.get(newSourceIndex).getName() + ".knownModels=" + numberOfKnownModels + Params.GRAPHVIS_OUT_DETAILS_FILE_EXT;
+//				GraphVizUtil.exportSemanticModelsToGraphviz(
+//						models,
+//						newSource.getName(),
+//						outName,
+//						GraphVizLabelType.LocalId,
+//						GraphVizLabelType.LocalUri,
+//						true,
+//						true);
 
 				numberOfKnownModels ++;
-				if (zeroKnownModel) break;
+				// BINH: comment out zeroKnownModel
+//				if (zeroKnownModel) break;
 			}
 
 		}

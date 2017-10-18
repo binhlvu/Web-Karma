@@ -31,7 +31,7 @@ public class Params {
 //	public static String DATASET_NAME = "museum-29-crm-lod";
 //	public static String DATASET_NAME = "music";
 	
-	public static String ROOT_DIR = "/Users/rook/workspace/DataIntegration/SourceModeling/data/jws-knowledge-graphs-2015/" + DATASET_NAME + "/";
+	public static String ROOT_DIR = "/home/rook/workspace/DataIntegration/Web-Karma-Data/" + DATASET_NAME + "/";
 	
 	public static String ONTOLOGY_DIR = ROOT_DIR + "preloaded-ontologies/";
 	

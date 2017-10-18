@@ -761,7 +761,7 @@ public class SemanticModel {
 		
 	}
 	
-	private void writeModel(JsonWriter writer) throws IOException {
+	public void writeModel(JsonWriter writer) throws IOException {
 		String nullStr = null;
 		writer.beginObject();
 		writer.name("id").value(this.getId());

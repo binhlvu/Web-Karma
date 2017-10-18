@@ -18,6 +18,7 @@
 		<module>karma-commands</module>
 		<module>karma-mr</module>
 		<module>karma-storm</module>
+		<module>karma-research</module>
 		<module>karma-web-services</module>
 		<module>karma-typer</module>
 	</modules>

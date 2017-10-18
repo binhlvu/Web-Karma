@@ -515,5 +515,31 @@ public class ModelingConfiguration {
 		knownModelsAlignment = false;
 	}
 
-	
+	public void setNumCandidateMappings(Integer numCandidateMappings) {
+		this.numCandidateMappings = numCandidateMappings;
+	}
+
+	public void setMappingBranchingFactor(Integer mappingBranchingFactor) {
+		this.mappingBranchingFactor = mappingBranchingFactor;
+	}
+
+	public void setTopKSteinerTree(Integer topKSteinerTree) {
+		this.topKSteinerTree = topKSteinerTree;
+	}
+
+	public void setScoringConfidenceCoefficient(Double scoringConfidenceCoefficient) {
+		this.scoringConfidenceCoefficient = scoringConfidenceCoefficient;
+	}
+
+	public void setScoringCoherenceSCoefficient(Double scoringCoherenceSCoefficient) {
+		this.scoringCoherenceSCoefficient = scoringCoherenceSCoefficient;
+	}
+
+	public void setScoringSizeCoefficient(Double scoringSizeCoefficient) {
+		this.scoringSizeCoefficient = scoringSizeCoefficient;
+	}
+
+	public void setMultipleSamePropertyPerNode(Boolean multipleSamePropertyPerNode) {
+		this.multipleSamePropertyPerNode = multipleSamePropertyPerNode;
+	}
 }
