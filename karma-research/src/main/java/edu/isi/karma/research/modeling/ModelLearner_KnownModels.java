@@ -782,16 +782,34 @@ public class ModelLearner_KnownModels {
 		int cutoff = 10; // this is to trim off the candidate models, (after combining all topKSteinerTree)
 		CliArg cliArg = null;
 
+//		args = new String[]{"-karma_home", "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home", "-dataset_name", "american_art", "-use_correct_type", "true", "-num_candidate_semantic_type", "4", "-multiple_same_property_per_node", "true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0", "-coefficient_size", "0.5", "-num_candidate_mappings", "50", "-mapping_branching_factor", "50", "-topk_steiner_tree", "10", "-cutoff", "1000000", "-train_size_min", "10", "-train_size_max", "90", "-test_source_index_begin", "0", "-test_source_index_end", "91"};
+
 //		if (args.length > 0) {
 			cliArg = new CliArg(args);
 			Params.ROOT_DIR = cliArg.karmaHome.endsWith("/") ? cliArg.karmaHome : cliArg.karmaHome + "/";
 			Params.DATASET_NAME = cliArg.datasetName;
+
 			useCorrectType = cliArg.useCorrectType;
 			numberOfCandidates = cliArg.numCandidateSemanticType;
 			cutoff = cliArg.cutoff;
 //		}
 
+		// reset Params according to CLI Args
+		Params.MODEL_MAIN_FILE_EXT = "model.json";
+		Params.MODEL_DIR = Params.ROOT_DIR + "models-json/";
+		Params.ONTOLOGY_DIR = Params.ROOT_DIR + "preloaded-ontologies/";
 		Params.OUTPUT_DIR = Params.ROOT_DIR + "output/";
+
+		Params.GRAPHS_DIR = Params.ROOT_DIR + "alignment-graph/";
+		Params.GRAPHVIS_DIR = Params.ROOT_DIR + "models-graphviz/";
+		Params.SOURCE_DIR = Params.ROOT_DIR + "sources/";
+		Params.R2RML_DIR = Params.ROOT_DIR + "models-r2rml/";
+		Params.RESULTS_DIR = Params.ROOT_DIR + "results/";
+
+		Params.LOD_DIR = Params.ROOT_DIR + "lod/";
+		Params.PATTERNS_DIR = Params.LOD_DIR + "patterns/";
+		Params.LOD_OBJECT_PROPERIES_FILE = Params.LOD_DIR + "objectproperties.csv";
+		Params.LOD_DATA_PROPERIES_FILE = Params.LOD_DIR + "dataproperties.csv";
 
 		///////////////////////////////////////////////////////////////////////////
 

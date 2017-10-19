@@ -46,7 +46,7 @@ public class Params {
 	
 	public static String GRAPH_FILE_EXT = ".graph.json";
 	
-	public static String MODEL_MAIN_FILE_EXT = ".model.json";
+	public static String MODEL_MAIN_FILE_EXT = "model.json";
 
 	public static String GRAPHVIS_MAIN_FILE_EXT = ".model.dot";
 	public static String GRAPHVIS_OUT_FILE_EXT = ".out.dot";
