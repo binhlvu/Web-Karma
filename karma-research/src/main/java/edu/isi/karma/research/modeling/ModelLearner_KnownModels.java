@@ -1103,63 +1103,64 @@ public class ModelLearner_KnownModels {
 						SortableSemanticModel m = topHypotheses.get(k);
 						serializedTopHypotheses.add(toJSONString(m));
 
-						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
+//						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
+//
+//						String label = "candidate " + k + "\n" +
+////								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
+//								"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
+//						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
+//								"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
+//						label += "confidence:" + m.getConfidenceScore() + "\n";
+//						label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
+//						label +=
+//								"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
+//										//								"-distance:" + me.getDistance() +
+//										"-precision:" + me.getPrecision() +
+//										"-recall:" + me.getRecall();
 
-						String label = "candidate " + k + "\n" +
-//								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
-								"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
-						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
-								"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
-						label += "confidence:" + m.getConfidenceScore() + "\n";
-						label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
-						label +=
-								"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
-										//								"-distance:" + me.getDistance() +
-										"-precision:" + me.getPrecision() +
-										"-recall:" + me.getRecall();
-
-						models.put(label, m);
-
-						if (k == 0) { // first rank model
-							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
-									", precision: " + me.getPrecision() +
-									", recall: " + me.getRecall() +
-									", time: " + elapsedTimeSec +
-									", accuracy: " + correctModel.getAccuracy() +
-									", mrr: " + correctModel.getMrr());
-							logger.info("number of known models: " + numberOfKnownModels +
-									", precision: " + me.getPrecision() +
-									", recall: " + me.getRecall() +
-									", time: " + elapsedTimeSec +
-									", accuracy: " + correctModel.getAccuracy() +
-									", mrr: " + correctModel.getMrr());
-//							resultFile.println("number of known models \t precision \t recall");
-//							resultFile.println(numberOfKnownModels + "\t" + me.getPrecision() + "\t" + me.getRecall());
-							String s = me.getPrecision() + "\t" +
-									me.getRecall() + "\t" +
-									elapsedTimeSec + "\t" +
-									correctModel.getAccuracy() + "\t" +
-									correctModel.getMrr();
-
-							if (iterativeEvaluation) {
-								if (resultsArray[numberOfKnownModels + 2].length() > 0)
-									resultsArray[numberOfKnownModels + 2].append(" \t ");
-								resultsArray[numberOfKnownModels + 2].append(s);
-							} else {
-								s = newSource.getName() + "\t" +
-										me.getPrecision() + "\t" +
-										me.getRecall() + "\t" +
-										elapsedTimeSec + "\t" +
-										correctModel.getAccuracy() + "\t" +
-										correctModel.getMrr();
-//								s = newSource.getName() + "\t" + me.getPrecision() + "\t" +
+//						models.put(label, m);
+						System.out.println("===========================================================");
+						System.out.println("newSource=" + newSource.getName());
+//						if (k == 0) { // first rank model
+//							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
+//									", precision: " + me.getPrecision() +
+//									", recall: " + me.getRecall() +
+//									", time: " + elapsedTimeSec +
+//									", accuracy: " + correctModel.getAccuracy() +
+//									", mrr: " + correctModel.getMrr());
+//							logger.info("number of known models: " + numberOfKnownModels +
+//									", precision: " + me.getPrecision() +
+//									", recall: " + me.getRecall() +
+//									", time: " + elapsedTimeSec +
+//									", accuracy: " + correctModel.getAccuracy() +
+//									", mrr: " + correctModel.getMrr());
+////							resultFile.println("number of known models \t precision \t recall");
+////							resultFile.println(numberOfKnownModels + "\t" + me.getPrecision() + "\t" + me.getRecall());
+//							String s = me.getPrecision() + "\t" +
+//									me.getRecall() + "\t" +
+//									elapsedTimeSec + "\t" +
+//									correctModel.getAccuracy() + "\t" +
+//									correctModel.getMrr();
+//
+//							if (iterativeEvaluation) {
+//								if (resultsArray[numberOfKnownModels + 2].length() > 0)
+//									resultsArray[numberOfKnownModels + 2].append(" \t ");
+//								resultsArray[numberOfKnownModels + 2].append(s);
+//							} else {
+//								s = newSource.getName() + "\t" +
+//										me.getPrecision() + "\t" +
 //										me.getRecall() + "\t" +
-//										elapsedTimeSec;
-								resultFile.println(s);
-							}
-
-//							resultFile.println(me.getPrecision() + "\t" + me.getRecall() + "\t" + elapsedTimeSec);
-						}
+//										elapsedTimeSec + "\t" +
+//										correctModel.getAccuracy() + "\t" +
+//										correctModel.getMrr();
+////								s = newSource.getName() + "\t" + me.getPrecision() + "\t" +
+////										me.getRecall() + "\t" +
+////										elapsedTimeSec;
+//								resultFile.println(s);
+//							}
+//
+////							resultFile.println(me.getPrecision() + "\t" + me.getRecall() + "\t" + elapsedTimeSec);
+//						}
 					}
 				}
 
