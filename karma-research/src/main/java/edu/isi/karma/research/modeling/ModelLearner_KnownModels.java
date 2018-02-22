@@ -782,7 +782,16 @@ public class ModelLearner_KnownModels {
 		int cutoff = 10; // this is to trim off the candidate models, (after combining all topKSteinerTree)
 		CliArg cliArg = null;
 
-//		args = new String[]{"-karma_home", "/home/rook/workspace/DataIntegration/SourceModeling/data/karma-home", "-dataset_name", "american_art", "-use_correct_type", "true", "-num_candidate_semantic_type", "4", "-multiple_same_property_per_node", "true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0", "-coefficient_size", "0.5", "-num_candidate_mappings", "50", "-mapping_branching_factor", "50", "-topk_steiner_tree", "10", "-cutoff", "1000000", "-train_size_min", "10", "-train_size_max", "90", "-test_source_index_begin", "0", "-test_source_index_end", "91"};
+//		args = new String[]{
+//				"-karma_home", "/Users/rook/workspace/DataIntegration/Web-Karma-Home",
+//				"-dataset_name", "american_art", "-use_correct_type", "false",
+//				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
+//				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
+//				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
+//				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
+//				"-cutoff", "1000000", "-train_size_min", "12",
+//				"-train_size_max", "12",
+//				"-test_source_index_begin", "12", "-test_source_index_end", "13"};
 
 //		if (args.length > 0) {
 			cliArg = new CliArg(args);
@@ -870,7 +879,6 @@ public class ModelLearner_KnownModels {
 		List<SemanticModel> semanticModels = 
 				ModelReader.importSemanticModelsFromJsonFiles(Params.MODEL_DIR, Params.MODEL_MAIN_FILE_EXT);
 
-		
 		File[] sources = new File(Params.SOURCE_DIR).listFiles();
 		File[] r2rmlModels = new File(Params.R2RML_DIR).listFiles();
 
@@ -885,8 +893,8 @@ public class ModelLearner_KnownModels {
 		List<SemanticModel> trainingData = new ArrayList<SemanticModel>();
 		File[] trainingSources;
 		File[] trainingModels;
-		File trainingSource = null;
-		File trainingModel = null;
+//		File trainingSource = null;
+//		File trainingModel = null;
 		File testSource;
 		File testModel;
 		
@@ -960,8 +968,8 @@ public class ModelLearner_KnownModels {
 		for (int i = testSourceIndexBegin; i < testSourceIndexEnd; i++) {
 			// clean semantic files folder in karma home
 			FileUtils.cleanDirectory(semFilesFolder);
-			trainingSource = null;
-			trainingModel = null;
+//			trainingSource = null;
+//			trainingModel = null;
 
 			int newSourceIndex = i;
 			SemanticModel newSource = semanticModels.get(newSourceIndex);
@@ -1002,10 +1010,10 @@ public class ModelLearner_KnownModels {
 						trainingSources[count] = sources[j];
 						trainingModels[count] = r2rmlModels[j];
 						count++;
-						if (count == numberOfKnownModels) {
-							trainingSource = sources[j];
-							trainingModel = r2rmlModels[j];
-						}
+//						if (count == numberOfKnownModels) {
+//							trainingSource = sources[j];
+//							trainingModel = r2rmlModels[j];
+//						}
 					} 
 					j++;
 				}
@@ -1018,8 +1026,13 @@ public class ModelLearner_KnownModels {
 					correctModel.setAccuracy(1.0);
 					correctModel.setMrr(1.0);
 				} else {
-					testSource = sources[newSourceIndex];
-					testModel = r2rmlModels[newSourceIndex];
+					// BINH: set correctModel to be a GoldModel, so that
+					// it will use learned semantic types of that
+					correctModel = newSource;
+
+//					testSource = sources[newSourceIndex];
+//					testModel = r2rmlModels[newSourceIndex];
+
 					// BINH: comment out iterativeEvaluation if
 //					if (iterativeEvaluation) {
 //						// TODO: don't understand why iterative Evaluation go here, it shouldn't depend on iterativeEvaluation
@@ -1027,9 +1040,10 @@ public class ModelLearner_KnownModels {
 //								trainingSource, trainingModel,
 //								testSource, testModel, numberOfKnownModels, numberOfCandidates);
 //					} else {
-						correctModel = new OfflineTraining().getCorrectModel(contextParameters, 
-								trainingSources, trainingModels, 
-								testSource, testModel, numberOfCandidates);
+						// BINH: uncomment to run mohsen semantic labeling...
+//						correctModel = new OfflineTraining().getCorrectModel(contextParameters,
+//								trainingSources, trainingModels,
+//								testSource, testModel, numberOfCandidates);
 //					}
 				}
 				
@@ -1103,6 +1117,9 @@ public class ModelLearner_KnownModels {
 						SortableSemanticModel m = topHypotheses.get(k);
 						serializedTopHypotheses.add(toJSONString(m));
 
+						// BINH: UNCOMMENT TO SEE THE EVALUATION (IT MAY RUNS SLOW)
+//						System.out.println("===========================================================");
+//						System.out.println("newSource=" + newSource.getName());
 //						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
 //
 //						String label = "candidate " + k + "\n" +
@@ -1117,10 +1134,9 @@ public class ModelLearner_KnownModels {
 //										//								"-distance:" + me.getDistance() +
 //										"-precision:" + me.getPrecision() +
 //										"-recall:" + me.getRecall();
-
+//
 //						models.put(label, m);
-						System.out.println("===========================================================");
-						System.out.println("newSource=" + newSource.getName());
+//
 //						if (k == 0) { // first rank model
 //							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
 //									", precision: " + me.getPrecision() +
@@ -1134,8 +1150,6 @@ public class ModelLearner_KnownModels {
 //									", time: " + elapsedTimeSec +
 //									", accuracy: " + correctModel.getAccuracy() +
 //									", mrr: " + correctModel.getMrr());
-////							resultFile.println("number of known models \t precision \t recall");
-////							resultFile.println(numberOfKnownModels + "\t" + me.getPrecision() + "\t" + me.getRecall());
 //							String s = me.getPrecision() + "\t" +
 //									me.getRecall() + "\t" +
 //									elapsedTimeSec + "\t" +
@@ -1153,13 +1167,8 @@ public class ModelLearner_KnownModels {
 //										elapsedTimeSec + "\t" +
 //										correctModel.getAccuracy() + "\t" +
 //										correctModel.getMrr();
-////								s = newSource.getName() + "\t" + me.getPrecision() + "\t" +
-////										me.getRecall() + "\t" +
-////										elapsedTimeSec;
 //								resultFile.println(s);
 //							}
-//
-////							resultFile.println(me.getPrecision() + "\t" + me.getRecall() + "\t" + elapsedTimeSec);
 //						}
 					}
 				}
