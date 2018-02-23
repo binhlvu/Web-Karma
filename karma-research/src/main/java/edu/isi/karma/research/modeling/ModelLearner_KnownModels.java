@@ -782,16 +782,16 @@ public class ModelLearner_KnownModels {
 		int cutoff = 10; // this is to trim off the candidate models, (after combining all topKSteinerTree)
 		CliArg cliArg = null;
 
-//		args = new String[]{
-//				"-karma_home", "/Users/rook/workspace/DataIntegration/Web-Karma-Home",
-//				"-dataset_name", "american_art", "-use_correct_type", "false",
-//				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
-//				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
-//				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
-//				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
-//				"-cutoff", "1000000", "-train_size_min", "12",
-//				"-train_size_max", "12",
-//				"-test_source_index_begin", "12", "-test_source_index_end", "13"};
+		args = new String[]{
+				"-karma_home", "/Users/rook/workspace/DataIntegration/SourceModeling/debug/soccer/mohsen_jws2015/",
+				"-dataset_name", "soccer", "-use_correct_type", "false",
+				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
+				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
+				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
+				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
+				"-cutoff", "1000000", "-train_size_min", "3",
+				"-train_size_max", "3",
+				"-test_source_index_begin", "3", "-test_source_index_end", "11"};
 
 //		if (args.length > 0) {
 			cliArg = new CliArg(args);
@@ -857,7 +857,7 @@ public class ModelLearner_KnownModels {
 					String.format("\t numberOfCandidates: %s", numberOfCandidates),
 					String.format("\t cutoff: %s", cutoff),
 					String.format("\t trainSize: [%s, %s]", cliArg.trainSizeMin, cliArg.trainSizeMax),
-					String.format("\t testSourceIndex: [%s, %s)", cliArg.testSourceIndexBegin, cliArg.testSourceIndexEnd),
+					String.format("\t testSourceIndex: [%s, %s]", cliArg.testSourceIndexBegin, cliArg.testSourceIndexEnd),
 					"",
 					String.format("\t modelingConfiguration.numCandidateMappings: %s", modelingConfiguration.getNumCandidateMappings()),
 					String.format("\t modelingConfiguration.mappingBranchingFactor: %s", modelingConfiguration.getMappingBranchingFactor()),
@@ -892,7 +892,7 @@ public class ModelLearner_KnownModels {
 
 		List<SemanticModel> trainingData = new ArrayList<SemanticModel>();
 		File[] trainingSources;
-		File[] trainingModels;
+//		File[] trainingModels;
 //		File trainingSource = null;
 //		File trainingModel = null;
 		File testSource;
@@ -954,7 +954,7 @@ public class ModelLearner_KnownModels {
 
 		// BINH: add code to control testing sources
 		int testSourceIndexBegin = 0;
-		int testSourceIndexEnd = semanticModels.size();
+		int testSourceIndexEnd = semanticModels.size() - 1;
 		int trainSizeMin = 0;
 		int trainSizeMax = semanticModels.size() - 1;
 
@@ -965,7 +965,7 @@ public class ModelLearner_KnownModels {
 			trainSizeMax = cliArg.trainSizeMax;
 		}
 
-		for (int i = testSourceIndexBegin; i < testSourceIndexEnd; i++) {
+		for (int i = testSourceIndexBegin; i <= testSourceIndexEnd; i++) {
 			// clean semantic files folder in karma home
 			FileUtils.cleanDirectory(semFilesFolder);
 //			trainingSource = null;
@@ -1001,14 +1001,14 @@ public class ModelLearner_KnownModels {
 
 				trainingData.clear();
 				trainingSources = new File[numberOfKnownModels];
-				trainingModels = new File[numberOfKnownModels];
+//				trainingModels = new File[numberOfKnownModels];
 
 				int j = 0, count = 0;
 				while (count < numberOfKnownModels) {
 					if (j != newSourceIndex) {
 						trainingData.add(semanticModels.get(j));
 						trainingSources[count] = sources[j];
-						trainingModels[count] = r2rmlModels[j];
+//						trainingModels[count] = r2rmlModels[j];
 						count++;
 //						if (count == numberOfKnownModels) {
 //							trainingSource = sources[j];
@@ -1118,58 +1118,58 @@ public class ModelLearner_KnownModels {
 						serializedTopHypotheses.add(toJSONString(m));
 
 						// BINH: UNCOMMENT TO SEE THE EVALUATION (IT MAY RUNS SLOW)
-//						System.out.println("===========================================================");
-//						System.out.println("newSource=" + newSource.getName());
-//						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
-//
-//						String label = "candidate " + k + "\n" +
-////								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
-//								"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
-//						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
-//								"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
-//						label += "confidence:" + m.getConfidenceScore() + "\n";
-//						label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
-//						label +=
-//								"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
-//										//								"-distance:" + me.getDistance() +
-//										"-precision:" + me.getPrecision() +
-//										"-recall:" + me.getRecall();
-//
-//						models.put(label, m);
-//
-//						if (k == 0) { // first rank model
-//							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
-//									", precision: " + me.getPrecision() +
-//									", recall: " + me.getRecall() +
-//									", time: " + elapsedTimeSec +
-//									", accuracy: " + correctModel.getAccuracy() +
-//									", mrr: " + correctModel.getMrr());
-//							logger.info("number of known models: " + numberOfKnownModels +
-//									", precision: " + me.getPrecision() +
-//									", recall: " + me.getRecall() +
-//									", time: " + elapsedTimeSec +
-//									", accuracy: " + correctModel.getAccuracy() +
-//									", mrr: " + correctModel.getMrr());
-//							String s = me.getPrecision() + "\t" +
-//									me.getRecall() + "\t" +
-//									elapsedTimeSec + "\t" +
-//									correctModel.getAccuracy() + "\t" +
-//									correctModel.getMrr();
-//
-//							if (iterativeEvaluation) {
-//								if (resultsArray[numberOfKnownModels + 2].length() > 0)
-//									resultsArray[numberOfKnownModels + 2].append(" \t ");
-//								resultsArray[numberOfKnownModels + 2].append(s);
-//							} else {
-//								s = newSource.getName() + "\t" +
-//										me.getPrecision() + "\t" +
-//										me.getRecall() + "\t" +
-//										elapsedTimeSec + "\t" +
-//										correctModel.getAccuracy() + "\t" +
-//										correctModel.getMrr();
-//								resultFile.println(s);
-//							}
-//						}
+						System.out.println("===========================================================");
+						System.out.println("newSource=" + newSource.getName());
+						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
+
+						String label = "candidate " + k + "\n" +
+//								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
+								"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
+						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
+								"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
+						label += "confidence:" + m.getConfidenceScore() + "\n";
+						label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
+						label +=
+								"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
+										//								"-distance:" + me.getDistance() +
+										"-precision:" + me.getPrecision() +
+										"-recall:" + me.getRecall();
+
+						models.put(label, m);
+
+						if (k == 0) { // first rank model
+							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
+									", precision: " + me.getPrecision() +
+									", recall: " + me.getRecall() +
+									", time: " + elapsedTimeSec +
+									", accuracy: " + correctModel.getAccuracy() +
+									", mrr: " + correctModel.getMrr());
+							logger.info("number of known models: " + numberOfKnownModels +
+									", precision: " + me.getPrecision() +
+									", recall: " + me.getRecall() +
+									", time: " + elapsedTimeSec +
+									", accuracy: " + correctModel.getAccuracy() +
+									", mrr: " + correctModel.getMrr());
+							String s = me.getPrecision() + "\t" +
+									me.getRecall() + "\t" +
+									elapsedTimeSec + "\t" +
+									correctModel.getAccuracy() + "\t" +
+									correctModel.getMrr();
+
+							if (iterativeEvaluation) {
+								if (resultsArray[numberOfKnownModels + 2].length() > 0)
+									resultsArray[numberOfKnownModels + 2].append(" \t ");
+								resultsArray[numberOfKnownModels + 2].append(s);
+							} else {
+								s = newSource.getName() + "\t" +
+										me.getPrecision() + "\t" +
+										me.getRecall() + "\t" +
+										elapsedTimeSec + "\t" +
+										correctModel.getAccuracy() + "\t" +
+										correctModel.getMrr();
+								resultFile.println(s);
+							}
+						}
 					}
 				}
 
