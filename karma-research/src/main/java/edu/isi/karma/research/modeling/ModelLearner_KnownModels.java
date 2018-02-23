@@ -780,28 +780,25 @@ public class ModelLearner_KnownModels {
 		boolean useCorrectType = true;
 		int numberOfCandidates = 4;
 		int cutoff = 10; // this is to trim off the candidate models, (after combining all topKSteinerTree)
-		CliArg cliArg = null;
 
-		args = new String[]{
-				"-karma_home", "/Users/rook/workspace/DataIntegration/SourceModeling/debug/soccer/mohsen_jws2015/",
-				"-dataset_name", "soccer", "-use_correct_type", "false",
-				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
-				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
-				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
-				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
-				"-cutoff", "1000000", "-train_size_min", "3",
-				"-train_size_max", "3",
-				"-test_source_index_begin", "3", "-test_source_index_end", "11"};
+//		args = new String[]{
+//				"-karma_home", "/Users/rook/workspace/DataIntegration/SourceModeling/debug/american_art_small/mohsen_jws2015/",
+//				"-dataset_name", "american_art_small", "-use_correct_type", "false",
+//				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
+//				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
+//				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
+//				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
+//				"-cutoff", "1000000",
+//				"-train_source_names", "s00---acm---acm-artist,s01---acm---acm-objects,s02---acm---acm-media,s03---autry---AutryCultureMade,s04---autry---AutryDated,s05---autry---AutryMakers,s06---autry---AutryMedia,s07---autry---AutryObjects,s08---autry---AutryPubDesc,s11---cbm---CBMAA_OtherTitles,s12---cbm---CBMAA_Titles,s14---cbm---CBMAA_URLs",
+//				"-test_source_names", "s15---cbm---CBMAA_Roles,s16---cbm---PG_Constituents,s17---cbm---PG_Objects,s18---cbm---PG_OtherTitles,s19---cbm---PG_Titles,s20---cbm---PG_UnknownTitles,s21---cbm---PG_URLs,s22---cbm---PG_Roles,s23---ccma---ccma_artists,s24---ccma---ccma_objects,s25---DMA---Constituents,s26---DMA---Objects"};
 
-//		if (args.length > 0) {
-			cliArg = new CliArg(args);
-			Params.ROOT_DIR = cliArg.karmaHome.endsWith("/") ? cliArg.karmaHome : cliArg.karmaHome + "/";
-			Params.DATASET_NAME = cliArg.datasetName;
+		CliArg cliArg = new CliArg(args);
+		Params.ROOT_DIR = cliArg.karmaHome.endsWith("/") ? cliArg.karmaHome : cliArg.karmaHome + "/";
+		Params.DATASET_NAME = cliArg.datasetName;
 
-			useCorrectType = cliArg.useCorrectType;
-			numberOfCandidates = cliArg.numCandidateSemanticType;
-			cutoff = cliArg.cutoff;
-//		}
+		useCorrectType = cliArg.useCorrectType;
+		numberOfCandidates = cliArg.numCandidateSemanticType;
+		cutoff = cliArg.cutoff;
 
 		// reset Params according to CLI Args
 		Params.MODEL_MAIN_FILE_EXT = "model.json";
@@ -856,8 +853,8 @@ public class ModelLearner_KnownModels {
 					String.format("\t useCorrectType: %s", useCorrectType),
 					String.format("\t numberOfCandidates: %s", numberOfCandidates),
 					String.format("\t cutoff: %s", cutoff),
-					String.format("\t trainSize: [%s, %s]", cliArg.trainSizeMin, cliArg.trainSizeMax),
-					String.format("\t testSourceIndex: [%s, %s]", cliArg.testSourceIndexBegin, cliArg.testSourceIndexEnd),
+					String.format("\t train_source_names: %s", Arrays.toString(cliArg.trainSourceNames)),
+					String.format("\t test_source_names: %s", Arrays.toString(cliArg.testSourceNames)),
 					"",
 					String.format("\t modelingConfiguration.numCandidateMappings: %s", modelingConfiguration.getNumCandidateMappings()),
 					String.format("\t modelingConfiguration.mappingBranchingFactor: %s", modelingConfiguration.getMappingBranchingFactor()),
@@ -891,13 +888,7 @@ public class ModelLearner_KnownModels {
 
 
 		List<SemanticModel> trainingData = new ArrayList<SemanticModel>();
-		File[] trainingSources;
-//		File[] trainingModels;
-//		File trainingSource = null;
-//		File trainingModel = null;
-		File testSource;
-		File testModel;
-		
+
 		OntologyManager ontologyManager = new OntologyManager(contextParameters.getId());
 		File ff = new File(Params.ONTOLOGY_DIR);
 		File[] files = ff.listFiles();
@@ -913,22 +904,14 @@ public class ModelLearner_KnownModels {
 		
 		ModelLearner_KnownModels modelLearner;
 		
-		boolean onlyGenerateSemanticTypeStatistics = false;
 		boolean iterativeEvaluation = false;
-		boolean onlyEvaluateInternalLinks = false || useCorrectType;
 		boolean zeroKnownModel = false;
 
-		if (onlyGenerateSemanticTypeStatistics) {
-			getStatistics(semanticModels);
-			return;
-		}
-		int numberOfKnownModels;
 		String filePath = Params.RESULTS_DIR + "temp/";
 		String filename = ""; 
 		filename += "results";
 		filename += useCorrectType ? "-correct":"-k=" + numberOfCandidates;
 		filename += zeroKnownModel ? "-ontology":"";
-		filename += onlyEvaluateInternalLinks ? "-internal":"-all";
 		filename += iterativeEvaluation ? "-iterative":"";
 		filename += ".csv"; 
 		
@@ -946,237 +929,134 @@ public class ModelLearner_KnownModels {
 			resultFile = new PrintWriter(new File(filePath + filename));
 			resultFile.println("source \t p \t r \t t \t a \t m \n");
 		}
-		
-//		new OfflineTraining().getCorrectModel(contextParameters, 
-//				null, null, 
-//				sources[20], r2rmlModels[20], 0, numberOfCandidates);
-//		if (true) return;
 
-		// BINH: add code to control testing sources
-		int testSourceIndexBegin = 0;
-		int testSourceIndexEnd = semanticModels.size() - 1;
-		int trainSizeMin = 0;
-		int trainSizeMax = semanticModels.size() - 1;
-
-		if (cliArg != null) {
-			testSourceIndexBegin = cliArg.testSourceIndexBegin;
-			testSourceIndexEnd = cliArg.testSourceIndexEnd;
-			trainSizeMin = cliArg.trainSizeMin;
-			trainSizeMax = cliArg.trainSizeMax;
+		// BINH: setup training data
+		// clean semantic files folder in karma home
+		FileUtils.cleanDirectory(semFilesFolder);
+		trainingData.clear();
+		int count = 0;
+		for (int i = 0; i < semanticModels.size(); i++) {
+			SemanticModel sm = semanticModels.get(i);
+			for (String sourceName: cliArg.trainSourceNames) {
+				if (sm.getId().startsWith(sourceName)) {
+					// using startsWith so that we can use prefix to test faster
+					trainingData.add(sm);
+					count++;
+				}
+			}
+		}
+		if (count != cliArg.trainSourceNames.length) {
+			throw new Exception("Invalid train source names");
 		}
 
-		for (int i = testSourceIndexBegin; i <= testSourceIndexEnd; i++) {
-			// clean semantic files folder in karma home
-			FileUtils.cleanDirectory(semFilesFolder);
-//			trainingSource = null;
-//			trainingModel = null;
-
-			int newSourceIndex = i;
-			SemanticModel newSource = semanticModels.get(newSourceIndex);
+		// BINH: testing later
+		for (String sourceName: cliArg.testSourceNames) {
+			SemanticModel newSource = null;
+			for (SemanticModel sm: semanticModels) {
+				if (sm.getId().startsWith(sourceName)) {
+					if (newSource != null) {
+						throw new Exception("Source name is not unique!");
+					} else {
+						newSource = sm;
+					}
+				}
+			}
 
 			logger.info("======================================================");
 			logger.info(newSource.getName() + "(#attributes:" + newSource.getColumnNodes().size() + ")");
-			System.out.println(newSource.getName() + "(#attributes:" + newSource.getColumnNodes().size() + ")");
 			logger.info("======================================================");
 
-			// BINH: comment out zeroKnownModel
-//			if (zeroKnownModel)
-//				numberOfKnownModels = 0;
-//			else
-//				numberOfKnownModels = iterativeEvaluation ? 0 : semanticModels.size() - 1;
+			SemanticModel correctModel;
+			if (useCorrectType) {
+				correctModel = newSource;
+				correctModel.setAccuracy(1.0);
+				correctModel.setMrr(1.0);
+			} else {
+				// BINH: set correctModel to be a GoldModel, so that
+				// it will use learned semantic types of that
+				correctModel = newSource;
+			}
+			List<ColumnNode> columnNodes = correctModel.getColumnNodes();
 
-			numberOfKnownModels = trainSizeMin;
+			List<Node> steinerNodes = new LinkedList<Node>(columnNodes);
 
-			if (iterativeEvaluation) {
-				if (resultsArray[0].length() > 0)	resultsArray[0].append(" \t ");			
-				resultsArray[0].append(newSource.getName() + "(" + newSource.getColumnNodes().size() + ")" + "\t" + " " + "\t" + " " + "\t" + " " + "\t" + " ");
-				if (resultsArray[1].length() > 0)	resultsArray[1].append(" \t ");			
-				resultsArray[1].append("p \t r \t t \t a \t m");
+			modelLearningGraph = (ModelLearningGraphCompact)ModelLearningGraph.getEmptyInstance(ontologyManager, ModelLearningGraphType.Compact);
+			logger.info("building the graph ...");
+			long start = System.currentTimeMillis();
+			for (SemanticModel sm : trainingData)
+				modelLearningGraph.addModelAndUpdate(sm, false);
+			modelLearner = new ModelLearner_KnownModels(modelLearningGraph.getGraphBuilder(), steinerNodes);
+
+			List<SortableSemanticModel> hypothesisList = modelLearner.hypothesize(useCorrectType, numberOfCandidates);
+
+			long elapsedTimeMillis = System.currentTimeMillis() - start;
+			float elapsedTimeSec = elapsedTimeMillis/1000F;
+
+			List<SortableSemanticModel> topHypotheses = null;
+			if (hypothesisList != null) {
+				topHypotheses = hypothesisList.size() > cutoff ?
+						hypothesisList.subList(0, cutoff) :
+						hypothesisList;
+			}
+			List<String> serializedTopHypotheses = new ArrayList<>();
+
+			Map<String, SemanticModel> models =
+					new TreeMap<String, SemanticModel>();
+
+			ModelEvaluation me;
+			models.put("1-correct model", correctModel);
+			if (topHypotheses != null) {
+				for (int k = 0; k < topHypotheses.size(); k++) {
+					SortableSemanticModel m = topHypotheses.get(k);
+					serializedTopHypotheses.add(toJSONString(m));
+					// BINH: UNCOMMENT TO SEE THE EVALUATION (IT MAY RUNS SLOW)
+					System.out.println("===========================================================");
+					System.out.println("newSource=" + newSource.getName());
+					me = m.evaluate(correctModel, false, false);
+
+					String label = "candidate " + k + "\n" +
+//								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
+							"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
+					label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
+							"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
+					label += "confidence:" + m.getConfidenceScore() + "\n";
+					label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
+					label +=
+							"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
+									//								"-distance:" + me.getDistance() +
+									"-precision:" + me.getPrecision() +
+									"-recall:" + me.getRecall();
+
+					models.put(label, m);
+
+					if (k == 0) { // first rank model
+						System.out.println("newSource=" + newSource.getName() + ", number of known models: " + cliArg.trainSourceNames.length +
+								", precision: " + me.getPrecision() +
+								", recall: " + me.getRecall() +
+								", time: " + elapsedTimeSec +
+								", accuracy: " + correctModel.getAccuracy() +
+								", mrr: " + correctModel.getMrr());
+						logger.info("number of known models: " + cliArg.trainSourceNames.length +
+								", precision: " + me.getPrecision() +
+								", recall: " + me.getRecall() +
+								", time: " + elapsedTimeSec +
+								", accuracy: " + correctModel.getAccuracy() +
+								", mrr: " + correctModel.getMrr());
+						String s = newSource.getName() + "\t" +
+								me.getPrecision() + "\t" +
+								me.getRecall() + "\t" +
+								elapsedTimeSec + "\t" +
+								correctModel.getAccuracy() + "\t" +
+								correctModel.getMrr();
+						resultFile.println(s);
+					}
+				}
 			}
 
-//			numberOfKnownModels = 20;
-			while (trainSizeMin <= numberOfKnownModels && numberOfKnownModels <= trainSizeMax)
-//            while (numberOfKnownModels < 20)
-			{
+			// BINH: write the sm candidate generation result to file in folder: output/
+			write2File(Params.OUTPUT_DIR + String.format("source--%s.json", newSource.getName()), serializedTopHypotheses);
 
-				trainingData.clear();
-				trainingSources = new File[numberOfKnownModels];
-//				trainingModels = new File[numberOfKnownModels];
-
-				int j = 0, count = 0;
-				while (count < numberOfKnownModels) {
-					if (j != newSourceIndex) {
-						trainingData.add(semanticModels.get(j));
-						trainingSources[count] = sources[j];
-//						trainingModels[count] = r2rmlModels[j];
-						count++;
-//						if (count == numberOfKnownModels) {
-//							trainingSource = sources[j];
-//							trainingModel = r2rmlModels[j];
-//						}
-					} 
-					j++;
-				}
-
-				modelLearningGraph = (ModelLearningGraphCompact)ModelLearningGraph.getEmptyInstance(ontologyManager, ModelLearningGraphType.Compact);
-				
-				SemanticModel correctModel;
-				if (useCorrectType) {
-					correctModel = newSource;
-					correctModel.setAccuracy(1.0);
-					correctModel.setMrr(1.0);
-				} else {
-					// BINH: set correctModel to be a GoldModel, so that
-					// it will use learned semantic types of that
-					correctModel = newSource;
-
-//					testSource = sources[newSourceIndex];
-//					testModel = r2rmlModels[newSourceIndex];
-
-					// BINH: comment out iterativeEvaluation if
-//					if (iterativeEvaluation) {
-//						// TODO: don't understand why iterative Evaluation go here, it shouldn't depend on iterativeEvaluation
-//						correctModel = new OfflineTraining().getCorrectModel(contextParameters,
-//								trainingSource, trainingModel,
-//								testSource, testModel, numberOfKnownModels, numberOfCandidates);
-//					} else {
-						// BINH: uncomment to run mohsen semantic labeling...
-//						correctModel = new OfflineTraining().getCorrectModel(contextParameters,
-//								trainingSources, trainingModels,
-//								testSource, testModel, numberOfCandidates);
-//					}
-				}
-				
-				
-				List<ColumnNode> columnNodes = correctModel.getColumnNodes();
-				//				if (useCorrectType && numberOfCRFCandidates > 1)
-				//					updateCrfSemanticTypesForResearchEvaluation(columnNodes);
-
-				List<Node> steinerNodes = new LinkedList<Node>(columnNodes);
-				modelLearner = new ModelLearner_KnownModels(modelLearningGraph.getGraphBuilder(), steinerNodes);
-				long start = System.currentTimeMillis();
-
-				String graphName = !iterativeEvaluation?
-						graphPath + semanticModels.get(newSourceIndex).getName() + Params.GRAPH_FILE_EXT : 
-							graphPath + semanticModels.get(newSourceIndex).getName() + ".knownModels=" + numberOfKnownModels + Params.GRAPH_FILE_EXT;
-
-				if (new File(graphName).exists()) {
-					// read graph from file
-					try {
-						logger.info("loading the graph ...");
-						DirectedWeightedMultigraph<Node, DefaultLink> graph = GraphUtil.importJson(graphName);
-						GraphBuilder gb = new GraphBuilderTopK(ontologyManager, graph);
-						modelLearner = new ModelLearner_KnownModels(gb, steinerNodes);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				} else {
-					logger.info("building the graph ...");
-					for (SemanticModel sm : trainingData)
-//						modelLearningGraph.addModel(sm);
-						modelLearningGraph.addModelAndUpdate(sm, false);
-					modelLearner = new ModelLearner_KnownModels(modelLearningGraph.getGraphBuilder(), steinerNodes);
-//					modelLearner.graphBuilder = modelLearningGraph.getGraphBuilder();
-//					modelLearner.nodeIdFactory = modelLearner.graphBuilder.getNodeIdFactory();
-					// save graph to file
-					try {
-//						GraphUtil.exportJson(modelLearningGraph.getGraphBuilder().getGraph(), graphName, true, true);
-//						GraphVizUtil.exportJGraphToGraphviz(modelLearner.graphBuilder.getGraph(), 
-//								"test", 
-//								true, 						
-//								GraphVizLabelType.LocalId,
-//								GraphVizLabelType.LocalUri,
-//								false, 
-//								true, 
-//								graphName + ".dot");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				
-				List<SortableSemanticModel> hypothesisList = modelLearner.hypothesize(useCorrectType, numberOfCandidates);
-				
-				long elapsedTimeMillis = System.currentTimeMillis() - start;
-				float elapsedTimeSec = elapsedTimeMillis/1000F;
-				
-				List<SortableSemanticModel> topHypotheses = null;
-				if (hypothesisList != null) {
-					topHypotheses = hypothesisList.size() > cutoff ? 
-							hypothesisList.subList(0, cutoff) : 
-								hypothesisList;
-				}
-				List<String> serializedTopHypotheses = new ArrayList<>();
-
-				Map<String, SemanticModel> models = 
-						new TreeMap<String, SemanticModel>();
-
-				ModelEvaluation me;
-				models.put("1-correct model", correctModel);
-				if (topHypotheses != null) {
-					for (int k = 0; k < topHypotheses.size(); k++) {
-						SortableSemanticModel m = topHypotheses.get(k);
-						serializedTopHypotheses.add(toJSONString(m));
-
-						// BINH: UNCOMMENT TO SEE THE EVALUATION (IT MAY RUNS SLOW)
-						System.out.println("===========================================================");
-						System.out.println("newSource=" + newSource.getName());
-						me = m.evaluate(correctModel, onlyEvaluateInternalLinks, false);
-
-						String label = "candidate " + k + "\n" +
-//								(m.getSteinerNodes() == null ? "" : m.getSteinerNodes().getScoreDetailsString()) +
-								"link coherence:" + (m.getLinkCoherence() == null ? "" : m.getLinkCoherence().getCoherenceValue()) + "\n";
-						label += (m.getSteinerNodes() == null || m.getSteinerNodes().getCoherence() == null) ?
-								"" : "node coherence:" + m.getSteinerNodes().getCoherence().getCoherenceValue() + "\n";
-						label += "confidence:" + m.getConfidenceScore() + "\n";
-						label += m.getSteinerNodes() == null ? "" : "mapping score:" + m.getSteinerNodes().getScore() + "\n";
-						label +=
-								"cost:" + roundDecimals(m.getCost(), 6) + "\n" +
-										//								"-distance:" + me.getDistance() +
-										"-precision:" + me.getPrecision() +
-										"-recall:" + me.getRecall();
-
-						models.put(label, m);
-
-						if (k == 0) { // first rank model
-							System.out.println("newSource=" + newSource.getName() + ", number of known models: " + numberOfKnownModels +
-									", precision: " + me.getPrecision() +
-									", recall: " + me.getRecall() +
-									", time: " + elapsedTimeSec +
-									", accuracy: " + correctModel.getAccuracy() +
-									", mrr: " + correctModel.getMrr());
-							logger.info("number of known models: " + numberOfKnownModels +
-									", precision: " + me.getPrecision() +
-									", recall: " + me.getRecall() +
-									", time: " + elapsedTimeSec +
-									", accuracy: " + correctModel.getAccuracy() +
-									", mrr: " + correctModel.getMrr());
-							String s = me.getPrecision() + "\t" +
-									me.getRecall() + "\t" +
-									elapsedTimeSec + "\t" +
-									correctModel.getAccuracy() + "\t" +
-									correctModel.getMrr();
-
-							if (iterativeEvaluation) {
-								if (resultsArray[numberOfKnownModels + 2].length() > 0)
-									resultsArray[numberOfKnownModels + 2].append(" \t ");
-								resultsArray[numberOfKnownModels + 2].append(s);
-							} else {
-								s = newSource.getName() + "\t" +
-										me.getPrecision() + "\t" +
-										me.getRecall() + "\t" +
-										elapsedTimeSec + "\t" +
-										correctModel.getAccuracy() + "\t" +
-										correctModel.getMrr();
-								resultFile.println(s);
-							}
-						}
-					}
-				}
-
-				// BINH: write the sm candidate generation result to file in folder: output/
-				write2File(Params.OUTPUT_DIR + String.format("trainsize%d--source--%s.json", numberOfKnownModels, newSource.getName()), serializedTopHypotheses);
-
-				// BINH: comment out the export semantic models to graphviz below
+			// BINH: comment out the export semantic models to graphviz below
 //				String outputPath = Params.OUTPUT_DIR;
 //				String outName = !iterativeEvaluation?
 //						outputPath + semanticModels.get(newSourceIndex).getName() + Params.GRAPHVIS_OUT_DETAILS_FILE_EXT :
@@ -1189,22 +1069,8 @@ public class ModelLearner_KnownModels {
 //						GraphVizLabelType.LocalUri,
 //						true,
 //						true);
-
-				numberOfKnownModels ++;
-				// BINH: comment out zeroKnownModel
-//				if (zeroKnownModel) break;
-			}
-
 		}
-		if (iterativeEvaluation) {
-			for (StringBuffer s : resultsArray)
-				resultFileIterative.println(s.toString());
-			resultFileIterative.close();
-		} else {
-			resultFile.close();
-		}
-		
+
+		resultFile.close();
 	}
-
-
 }

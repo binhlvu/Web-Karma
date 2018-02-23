@@ -1,6 +1,5 @@
 package edu.isi.karma.research.modeling;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.isi.karma.config.ModelingConfiguration;
@@ -22,6 +21,8 @@ public class CliArg {
     public boolean useCorrectType;
     public int numCandidateSemanticType;
     public int cutoff;
+    public String[] trainSourceNames;
+    public String[] testSourceNames;
     public int trainSizeMin;
     public int trainSizeMax;
     public int testSourceIndexBegin;
@@ -49,10 +50,8 @@ public class CliArg {
         options.addOption("coefficient_coherence", true, "");
         options.addOption("coefficient_size", true, "");
 
-        options.addOption("train_size_min", true, "Control number of known semantic models (inclusive)");
-        options.addOption("train_size_max", true, "Control number of known semantic models (inclusive)");
-        options.addOption("test_source_index_begin", true, "Control which source we test (inclusive)");
-        options.addOption("test_source_index_end", true, "Control which source we test (exclusive)");
+        options.addOption("train_source_names", true, "List of known semantic models (comma separated)");
+        options.addOption("test_source_names", true, "List of sources want to test (comma separated)");
 
         parse();
     }
@@ -101,31 +100,17 @@ public class CliArg {
                 help();
             }
 
-            if (cmd.hasOption("train_size_min")) {
-                trainSizeMin = Integer.parseInt(cmd.getOptionValue("train_size_min"));
+            if (cmd.hasOption("train_source_names")) {
+                trainSourceNames = cmd.getOptionValue("train_source_names").split(",");
             } else {
-                System.err.println("Missing required arg: train_size_min");
+                System.err.println("Missing required arg: train_source_names");
                 help();
             }
 
-            if (cmd.hasOption("train_size_max")) {
-                trainSizeMax = Integer.parseInt(cmd.getOptionValue("train_size_max"));
+            if (cmd.hasOption("test_source_names")) {
+                testSourceNames = cmd.getOptionValue("test_source_names").split(",");
             } else {
-                System.err.println("Missing required arg: train_size_max");
-                help();
-            }
-
-            if (cmd.hasOption("test_source_index_begin")) {
-                testSourceIndexBegin = Integer.parseInt(cmd.getOptionValue("test_source_index_begin"));
-            } else {
-                System.err.println("Missing required arg: test_source_index_begin");
-                help();
-            }
-
-            if (cmd.hasOption("test_source_index_end")) {
-                testSourceIndexEnd = Integer.parseInt(cmd.getOptionValue("test_source_index_end"));
-            } else {
-                System.err.println("Missing required arg: test_source_index_end");
+                System.err.println("Missing required arg: test_source_names");
                 help();
             }
 
