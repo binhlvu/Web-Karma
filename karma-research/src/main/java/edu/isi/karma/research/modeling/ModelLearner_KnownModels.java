@@ -781,18 +781,18 @@ public class ModelLearner_KnownModels {
 		int numberOfCandidates = 4;
 		int cutoff = 10; // this is to trim off the candidate models, (after combining all topKSteinerTree)
 
-		args = new String[]{
-				"-karma_home", "/Users/rook/workspace/DataIntegration/SourceModeling/debug/museum_edm/mohsen_jws2015",
-				"-dataset_name", "museum_edm", "-use_correct_type", "false",
-				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
-				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
-				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
-				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
-				"-cutoff", "1000000",
-				"-train_source_names", "s01-cb,s02-dma,s03-ima-artists,s04-ima-artworks,s05-met,s06-npg,s07-s-13,s08-s-17-edited,s09-s-18-artists,s10-s-18-artworks,s11-s-19-artists,s12-s-19-artworks,s13-s-art-institute-of-chicago,s14-s-california-african-american",
-				"-test_source_names", "s01-cb,s02-dma,s03-ima-artists,s04-ima-artworks,s05-met,s06-npg,s07-s-13,s08-s-17-edited,s09-s-18-artists,s10-s-18-artworks,s11-s-19-artists,s12-s-19-artworks,s13-s-art-institute-of-chicago,s14-s-california-african-american,s15-s-detroit-institute-of-art,s16-s-hammer,s17-s-houston-museum-of-fine-arts,s18-s-indianapolis-artists,s19-s-indianapolis-artworks,s20-s-lacma,s21-s-met,s22-s-moca,s23-s-national-portrait-gallery,s24-s-norton-simon,s25-s-oakland-museum-paintings,s26-s-san-francisco-moma,s27-s-the-huntington,s28-wildlife-art,s29-gilcrease",
-				"-use_old_semantic_typer", "true"
-		};
+//		args = new String[]{
+//				"-karma_home", "/Users/rook/workspace/DataIntegration/SourceModeling/debug/museum_edm/mohsen_jws2015",
+//				"-dataset_name", "museum_edm", "-use_correct_type", "false",
+//				"-num_candidate_semantic_type", "4", "-multiple_same_property_per_node",
+//				"true", "-coefficient_coherence", "1.0", "-coefficient_confidence", "1.0",
+//				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
+//				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
+//				"-cutoff", "1000000",
+//				"-train_source_names", "s01-cb,s02-dma,s03-ima-artists,s04-ima-artworks,s05-met,s06-npg,s07-s-13,s08-s-17-edited,s09-s-18-artists,s10-s-18-artworks,s11-s-19-artists,s12-s-19-artworks,s13-s-art-institute-of-chicago,s14-s-california-african-american",
+//				"-test_source_names", "s01-cb,s02-dma,s03-ima-artists,s04-ima-artworks,s05-met,s06-npg,s07-s-13,s08-s-17-edited,s09-s-18-artists,s10-s-18-artworks,s11-s-19-artists,s12-s-19-artworks,s13-s-art-institute-of-chicago,s14-s-california-african-american,s15-s-detroit-institute-of-art,s16-s-hammer,s17-s-houston-museum-of-fine-arts,s18-s-indianapolis-artists,s19-s-indianapolis-artworks,s20-s-lacma,s21-s-met,s22-s-moca,s23-s-national-portrait-gallery,s24-s-norton-simon,s25-s-oakland-museum-paintings,s26-s-san-francisco-moma,s27-s-the-huntington,s28-wildlife-art,s29-gilcrease",
+//				"-use_old_semantic_typer", "true"
+//		};
 
 		CliArg cliArg = new CliArg(args);
 		Params.ROOT_DIR = cliArg.karmaHome.endsWith("/") ? cliArg.karmaHome : cliArg.karmaHome + "/";
