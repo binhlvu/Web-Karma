@@ -19,6 +19,7 @@ public class CliArg {
     public String datasetName;
     public String karmaHome;
     public boolean useCorrectType;
+    public boolean useOldSemanticTyper;
     public int numCandidateSemanticType;
     public int cutoff;
     public String[] trainSourceNames;
@@ -52,6 +53,7 @@ public class CliArg {
 
         options.addOption("train_source_names", true, "List of known semantic models (comma separated)");
         options.addOption("test_source_names", true, "List of sources want to test (comma separated)");
+        options.addOption("use_old_semantic_typer", true, "Should the algorithm use its own semantic typer or use provided semantic types");
 
         parse();
     }
@@ -111,6 +113,13 @@ public class CliArg {
                 testSourceNames = cmd.getOptionValue("test_source_names").split(",");
             } else {
                 System.err.println("Missing required arg: test_source_names");
+                help();
+            }
+
+            if (cmd.hasOption("use_old_semantic_typer")) {
+                useOldSemanticTyper = Boolean.parseBoolean(cmd.getOptionValue("use_old_semantic_typer"));
+            } else {
+                System.err.println("Missing required arg: use_old_semantic_typer");
                 help();
             }
 
