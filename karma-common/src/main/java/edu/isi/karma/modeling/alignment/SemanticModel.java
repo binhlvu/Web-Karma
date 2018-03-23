@@ -96,7 +96,6 @@ public class SemanticModel {
 	
 	public SemanticModel(String id,
 			DirectedWeightedMultigraph<Node, LabeledLink> graph) {
-
 		this.id = id;
 		this.graph = graph;
 //		this.selection = SuperSelectionManager.DEFAULT_SELECTION;

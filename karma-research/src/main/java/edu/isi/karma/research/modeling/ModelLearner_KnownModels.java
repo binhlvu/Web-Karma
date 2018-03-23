@@ -789,8 +789,8 @@ public class ModelLearner_KnownModels {
 //				"-coefficient_size", "0.5", "-num_candidate_mappings", "50",
 //				"-mapping_branching_factor", "50", "-topk_steiner_tree", "10",
 //				"-cutoff", "1000000",
-//				"-train_source_names", "s01-cb,s02-dma,s03-ima-artists,s04-ima-artworks,s05-met,s06-npg,s07-s-13,s08-s-17-edited,s09-s-18-artists,s10-s-18-artworks,s11-s-19-artists,s12-s-19-artworks,s13-s-art-institute-of-chicago,s14-s-california-african-american",
-//				"-test_source_names", "s01-cb,s02-dma,s03-ima-artists,s04-ima-artworks,s05-met,s06-npg,s07-s-13,s08-s-17-edited,s09-s-18-artists,s10-s-18-artworks,s11-s-19-artists,s12-s-19-artworks,s13-s-art-institute-of-chicago,s14-s-california-african-american,s15-s-detroit-institute-of-art,s16-s-hammer,s17-s-houston-museum-of-fine-arts,s18-s-indianapolis-artists,s19-s-indianapolis-artworks,s20-s-lacma,s21-s-met,s22-s-moca,s23-s-national-portrait-gallery,s24-s-norton-simon,s25-s-oakland-museum-paintings,s26-s-san-francisco-moma,s27-s-the-huntington,s28-wildlife-art,s29-gilcrease",
+//				"-train_source_names", "s01-cb,s02-dma",
+//				"-test_source_names", "s04-ima-artworks",
 //				"-use_old_semantic_typer", "true"
 //		};
 
@@ -1017,6 +1017,7 @@ public class ModelLearner_KnownModels {
 						hypothesisList;
 			}
 			List<String> serializedTopHypotheses = new ArrayList<>();
+			List<String> correctModels = new ArrayList<>();
 
 			Map<String, SemanticModel> models =
 					new TreeMap<String, SemanticModel>();
@@ -1026,10 +1027,18 @@ public class ModelLearner_KnownModels {
 			if (topHypotheses != null) {
 				for (int k = 0; k < topHypotheses.size(); k++) {
 					SortableSemanticModel m = topHypotheses.get(k);
+					// BINH: update semantic types from columnNodes to graph of semantic models, so that it will be
+					// serialize correctly
+					for (Node n: m.getGraph().vertexSet()) {
+						if (n instanceof ColumnNode) {
+							((ColumnNode) n).setLearnedSemanticTypes(m.getMappingToSourceColumns().get(n).getLearnedSemanticTypes());
+							((ColumnNode) n).assignUserType(m.getMappingToSourceColumns().get(n).getUserSemanticTypes().get(0));
+						}
+					}
 					serializedTopHypotheses.add(toJSONString(m));
 					// BINH: UNCOMMENT TO SEE THE EVALUATION (IT MAY RUNS SLOW)
-					System.out.println("===========================================================");
-					System.out.println("newSource=" + newSource.getName());
+//					System.out.println("===========================================================");
+//					System.out.println("newSource=" + newSource.getName());
 					me = m.evaluate(correctModel, false, false);
 
 					String label = "candidate " + k + "\n" +
@@ -1073,7 +1082,8 @@ public class ModelLearner_KnownModels {
 
 			// BINH: write the sm candidate generation result to file in folder: output/
 			write2File(Params.OUTPUT_DIR + String.format("source--%s.json", newSource.getName()), serializedTopHypotheses);
-
+			// BINH: write down semantic models so that we can re-align them later
+			correctModel.writeJson(Params.OUTPUT_DIR + String.format("source--%s.original.json", newSource.getName()));
 			// BINH: comment out the export semantic models to graphviz below
 //				String outputPath = Params.OUTPUT_DIR;
 //				String outName = !iterativeEvaluation?

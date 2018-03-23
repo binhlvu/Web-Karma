@@ -428,13 +428,13 @@ public class OfflineTraining {
 			sm.writeJson(modelJson);
 		} catch (Exception e) {
 			logger.error("error in exporting the model to JSON!");
-			//			e.printStackTrace();
+						e.printStackTrace();
 		}
 		try {
 			sm.writeGraphviz(modelGraphviz, false, false);
 		} catch (Exception e) {
 			logger.error("error in exporting the model to GRAPHVIZ!");
-			//			e.printStackTrace();
+			e.printStackTrace();
 		}
 		EvaluateMRR.printEvaluatedJSON(modelJson, evaluateMRR);
 
