@@ -11,6 +11,7 @@
 	<modules>
 		<module>karma-common</module>
 		<module>karma-web</module>
+        <module>karma-offline</module>
 		<module>karma-jdbc</module>
 		<module>karma-util</module>
 		<module>karma-cleaning</module>
