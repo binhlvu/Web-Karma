@@ -377,7 +377,7 @@ public class GraphBuilder {
 			String uri = node.getUri();
 			Label label = this.ontologyManager.getUriLabel(uri);
 			if (label == null) {
-				logger.debug("The resource " + uri + " does not exist in the ontology.");
+				logger.error("The resource " + uri + " does not exist in the ontology.");
 				return false;
 			}
 			node.getLabel().setNs(label.getNs());
